@@ -8,7 +8,7 @@
 		<version>3.3.2</version>
 		<relativePath/>
 	</parent>
-	<groupId>com.engineering</groupId>
+	<groupId>com.paytm</groupId>
 	<artifactId>url-shortener</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>url-shortener</name>
