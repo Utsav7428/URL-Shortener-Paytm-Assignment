@@ -93,7 +93,7 @@ class UrlShortenerControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("GET /{shortCode} - Should redirect with 302 Found to original URL")
+    @DisplayName("GET /{shortCode} - Should redirect with 301 Moved Permanently to original URL")
     void redirectSuccess() throws Exception {
         ShortenRequest request = ShortenRequest.builder()
                 .url("https://www.wikipedia.org")
@@ -106,7 +106,7 @@ class UrlShortenerControllerIntegrationTest {
                 .andExpect(status().isCreated());
 
         mockMvc.perform(get("/wiki"))
-                .andExpect(status().isFound())
+                .andExpect(status().isMovedPermanently())
                 .andExpect(redirectedUrl("https://www.wikipedia.org"));
     }
 

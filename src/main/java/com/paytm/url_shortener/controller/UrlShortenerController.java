@@ -43,12 +43,10 @@ public class UrlShortenerController {
         return ResponseEntity.ok(service.getLinkAnalytics(shortCode));
     }
 
-    // Consolidated redirect endpoint with asynchronous analytics logging
     @GetMapping("/{shortCode:[a-zA-Z0-9\\-_]+}")
     public RedirectView redirectToOriginalUrl(@PathVariable String shortCode, HttpServletRequest request) {
         UrlMapping mapping = service.getMappingEntity(shortCode);
 
-        // Extract caller metadata
         String userAgent = request.getHeader("User-Agent");
         String referer = request.getHeader("Referer");
         String ipAddress = request.getHeader("X-Forwarded-For");
@@ -56,11 +54,11 @@ public class UrlShortenerController {
             ipAddress = request.getRemoteAddr();
         }
 
-        // Fire off asynchronous, non-blocking click logging task
         analyticsService.recordClickAsync(mapping, userAgent, referer, ipAddress);
 
         RedirectView redirectView = new RedirectView();
         redirectView.setUrl(mapping.getOriginalUrl());
+        redirectView.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
         return redirectView;
     }
 }
