@@ -2,6 +2,7 @@ package com.paytm.url_shortener.repository;
 
 import com.paytm.url_shortener.model.UrlMapping;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
@@ -11,4 +12,7 @@ public interface UrlMappingRepository extends JpaRepository<UrlMapping, Long> {
     Optional<UrlMapping> findByShortCode(String shortCode);
 
     Optional<UrlMapping> findByOriginalUrlAndIsCustomFalse(String originalUrl);
+
+    @Query(value = "SELECT nextval('url_mappings_id_seq')", nativeQuery = true)
+    Long getNextId();
 }
