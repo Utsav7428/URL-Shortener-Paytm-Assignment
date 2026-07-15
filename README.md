@@ -7,7 +7,7 @@ A production-style URL Shortener built using **Spring Boot** and **PostgreSQL** 
 -  Shorten long URLs
 -  Custom aliases
 -  Collision-free Base62 encoded short codes
--  HTTP 302 redirects
+-  HTTP 301 Moved Permanently
 -  Click analytics dashboard
 -  Asynchronous analytics collection using Spring `@Async`
 -  PostgreSQL persistence
@@ -35,9 +35,9 @@ A production-style URL Shortener built using **Spring Boot** and **PostgreSQL** 
 
 The application separates the user redirect path from analytics collection to minimize redirect latency.
 
-<img width="495" height="866" alt="Screenshot (195)" src="https://github.com/user-attachments/assets/942badfc-d3ce-44c7-b4ac-e568eaeba22a" />
+<img width="472" height="667" alt="url-shortener-hld" src="https://github.com/user-attachments/assets/0f33dc0a-a205-4ce4-99bc-2712759a5bb6" />
 
-<img width="1127" height="724" alt="Screenshot (196)" src="https://github.com/user-attachments/assets/76d3738b-8f27-4717-8fe7-fc0a022d0f2e" />
+<img width="1040" height="549" alt="url-shortener-sequence" src="https://github.com/user-attachments/assets/ba7193c7-2ca0-4035-aab7-bf1e65dd6167" />
 
 
 
@@ -67,7 +67,7 @@ Analytics persistence is completely decoupled from the redirect flow.
 Workflow:
 
 1. Lookup short code.
-2. Return HTTP 302 immediately.
+2. Return HTTP 301 immediately.
 3. Record click analytics in a background thread.
 
 This ensures database writes never increase redirect latency.
