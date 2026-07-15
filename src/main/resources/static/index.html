@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SleekLink | URL Analytics Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+
+<nav class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="bg-indigo-600 p-2 rounded-lg text-white font-bold">
+                <i class="fa-solid fa-link-slash"></i>
+            </div>
+            <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">SleekLink</span>
+        </div>
+        <div class="text-sm text-slate-400 font-medium">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 mr-1.5"></span>
+                    API Active
+                </span>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <div class="lg:col-span-1 bg-slate-800/50 border border-slate-800 rounded-2xl p-6 h-fit backdrop-blur">
+            <h2 class="text-lg font-bold mb-4 text-white flex items-center gap-2">
+                <i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i> Shorten a Link
+            </h2>
+            <form id="shortenForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Original Destination URL</label>
+                    <input type="url" id="originalUrlInput" required placeholder="https://example.com/long-path-goes-here"
+                           class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Custom Alias (Optional)</label>
+                    <input type="text" id="aliasInput" placeholder="e.g. promo-page"
+                           class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-lg transition duration-200">
+                    Generate Short Link
+                </button>
+            </form>
+
+            <div id="resultBox" class="mt-6 p-4 rounded-lg bg-indigo-950/40 border border-indigo-800/60 hidden">
+                <p class="text-xs font-semibold text-indigo-300 uppercase tracking-wider">Short URL Ready!</p>
+                <div class="flex items-center justify-between mt-2 gap-2">
+                    <a href="#" id="shortLinkResult" target="_blank" class="text-cyan-400 font-bold hover:underline truncate"></a>
+                    <button onclick="copyToClipboard()" class="text-slate-400 hover:text-white px-2 py-1 rounded border border-slate-700 bg-slate-800 text-xs shrink-0">
+                        <i class="fa-solid fa-copy"></i> Copy
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2 space-y-8">
+
+            <div class="bg-slate-800/30 border border-slate-800/80 rounded-2xl p-6 backdrop-blur">
+                <h2 class="text-lg font-bold mb-4 text-white flex items-center justify-between">
+                    <span><i class="fa-solid fa-list text-cyan-400 mr-2"></i> Active Shortcodes</span>
+                    <button onclick="loadLinks()" class="text-xs text-indigo-400 hover:text-indigo-300"><i class="fa-solid fa-rotate"></i> Refresh List</button>
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                        <tr class="border-b border-slate-800 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                            <th class="py-3 px-4">Short Link</th>
+                            <th class="py-3 px-4">Destination</th>
+                            <th class="py-3 px-4 text-center">Type</th>
+                            <th class="py-3 px-4 text-right">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="linksTableBody" class="divide-y divide-slate-800/50 text-sm">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="analyticsSection" class="bg-slate-800/30 border border-slate-800/80 rounded-2xl p-6 backdrop-blur hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-chart-line text-emerald-400 mr-2"></i> Realtime Link Metrics</h2>
+                        <p id="analyticsTarget" class="text-xs text-slate-400 mt-1 truncate max-w-md"></p>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-700 px-4 py-2 rounded-xl text-center">
+                        <span class="block text-2xl font-extrabold text-emerald-400" id="totalClicksBadge">0</span>
+                        <span class="text-[10px] uppercase text-slate-400 font-bold">Total Visits</span>
+                    </div>
+                </div>
+
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Recent Click Stream (Max 10 Logs)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead>
+                        <tr class="bg-slate-900/50 text-slate-400 font-semibold border-b border-slate-800">
+                            <th class="py-2 px-3">Date/Time</th>
+                            <th class="py-2 px-3">IP Address</th>
+                            <th class="py-2 px-3">Browser / OS (User-Agent)</th>
+                            <th class="py-2 px-3">Referer</th>
+                        </tr>
+                        </thead>
+                        <tbody id="analyticsTableBody" class="divide-y divide-slate-800/50">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<script>
+    const API_BASE = '/api/v1';
+
+    document.getElementById('shortenForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const originalUrl = document.getElementById('originalUrlInput').value;
+        const customAlias = document.getElementById('aliasInput').value;
+
+        try {
+            const response = await fetch(`${API_BASE}/shorten`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: originalUrl, customAlias: customAlias || null })
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                alert(err.message || "Failed to shorten URL");
+                return;
+            }
+
+            const data = await response.json();
+
+            // Show UI Results
+            const resultBox = document.getElementById('resultBox');
+            const shortLinkResult = document.getElementById('shortLinkResult');
+            resultBox.classList.remove('hidden');
+            shortLinkResult.innerText = data.shortUrl;
+            shortLinkResult.href = data.shortUrl;
+
+            document.getElementById('shortenForm').reset();
+            loadLinks();
+        } catch (err) {
+            console.error(err);
+            alert("An unexpected error occurred.");
+        }
+    });
+
+    async function loadLinks() {
+        try {
+            const res = await fetch(`${API_BASE}/links`);
+            const links = await res.json();
+            const tbody = document.getElementById('linksTableBody');
+            tbody.innerHTML = '';
+
+            if(links.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-slate-500 text-xs">No active links created yet.</td></tr>`;
+                return;
+            }
+
+            links.forEach(link => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/20 transition-colors duration-150";
+                tr.innerHTML = `
+                    <td class="py-3.5 px-4 font-bold text-slate-100">
+                        <a href="${link.shortUrl}" target="_blank" class="hover:underline text-cyan-400">${link.shortCode}</a>
+                    </td>
+                    <td class="py-3.5 px-4 truncate max-w-[180px] text-slate-400" title="${link.originalUrl}">
+                        ${link.originalUrl}
+                    </td>
+                    <td class="py-3.5 px-4 text-center">
+                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold ${link.custom ? 'bg-amber-400/10 text-amber-400 border border-amber-400/20' : 'bg-indigo-400/10 text-indigo-400 border border-indigo-400/20'}">
+                            ${link.custom ? 'Custom' : 'Standard'}
+                        </span>
+                    </td>
+                    <td class="py-3.5 px-4 text-right">
+                        <button onclick="viewAnalytics('${link.shortCode}')" class="text-xs bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded transition">
+                            <i class="fa-solid fa-chart-simple"></i> Analytics
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (err) {
+            console.error("Failed to fetch link records", err);
+        }
+    }
+
+    async function viewAnalytics(code) {
+        try {
+            const res = await fetch(`${API_BASE}/analytics/${code}`);
+            if (!res.ok) {
+                alert("Unable to grab metrics");
+                return;
+            }
+            const data = await res.json();
+
+            // Unhide the drawer
+            const section = document.getElementById('analyticsSection');
+            section.classList.remove('hidden');
+
+            document.getElementById('analyticsTarget').innerText = `Tracking target: ${data.originalUrl}`;
+            document.getElementById('totalClicksBadge').innerText = data.totalClicks;
+
+            const tableBody = document.getElementById('analyticsTableBody');
+            tableBody.innerHTML = '';
+
+            if(data.recentClicks.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-slate-500">No telemetry data recorded yet. Hit the link to generate data.</td></tr>`;
+                return;
+            }
+
+            data.recentClicks.forEach(click => {
+                const row = document.createElement('tr');
+                const clickTime = new Date(click.clickedAt).toLocaleString();
+                row.innerHTML = `
+                    <td class="py-2.5 px-3 text-slate-400 whitespace-nowrap">${clickTime}</td>
+                    <td class="py-2.5 px-3 font-mono text-slate-200">${click.ipAddress}</td>
+                    <td class="py-2.5 px-3 truncate max-w-[200px]" title="${click.userAgent}">${click.userAgent || 'N/A'}</td>
+                    <td class="py-2.5 px-3 truncate max-w-[120px] text-slate-400" title="${click.referer}">${click.referer || 'Direct'}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            section.scrollIntoView({ behavior: 'smooth' });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    function copyToClipboard() {
+        const copyText = document.getElementById("shortLinkResult").innerText;
+        navigator.clipboard.writeText(copyText).then(() => {
+            alert("Short link copied to clipboard!");
+        });
+    }
+
+    // Initial setup
+    window.onload = loadLinks;
+</script>
+</body>
+</html>
